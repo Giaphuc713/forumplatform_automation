@@ -10,6 +10,10 @@ test.describe("Forum post create, update, and delete", () => {
 
     try {
       // 1. Start authenticated on the forum feed with no post bearing the unique title used by this test.
+      await page.goto("/forum");
+      await expect(
+        page.getByRole("link", { name: "Ha Gia Phuc Ha Gia Phuc" }),
+      ).toBeVisible();
       await page.getByText("Best").first().waitFor({ state: "visible" });
 
       // 2. Open Create, choose a community the user belongs to, enter a unique title and non-empty body, then submit.
@@ -41,7 +45,9 @@ test.describe("Forum post create, update, and delete", () => {
       await expect(page).toHaveURL(/\/forum(?:\/|$)/);
 
       // 3. Locate the new post by its unique title and reload the feed.
-      const article = page.locator("article").filter({ hasText: title });
+      const article = page
+        .locator("article")
+        .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
       await expect(article).toHaveCount(1);
       await expect(article.getByRole("heading", { name: title })).toBeVisible();
       await expect(article.getByText(body, { exact: true })).toBeVisible();
@@ -49,7 +55,7 @@ test.describe("Forum post create, update, and delete", () => {
       await page.reload();
       const persistedArticle = page
         .locator("article")
-        .filter({ hasText: title });
+        .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
       await expect(persistedArticle).toHaveCount(1);
       await expect(
         persistedArticle.getByRole("heading", { name: title }),
@@ -69,7 +75,9 @@ test.describe("Forum post create, update, and delete", () => {
         page.getByText("Post deleted successfully!", { exact: true }),
       ).toBeVisible();
       await expect(
-        page.locator("article").filter({ hasText: title }),
+        page
+          .locator("article")
+          .filter({ has: page.getByRole("heading", { name: title, exact: true }) }),
       ).toHaveCount(0);
       created = false;
     } finally {
@@ -77,7 +85,7 @@ test.describe("Forum post create, update, and delete", () => {
         await page.goto("/forum");
         const cleanupArticle = page
           .locator("article")
-          .filter({ hasText: title });
+          .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
         if (await cleanupArticle.count()) {
           await cleanupArticle.getByTestId(/menu-post-/).click();
           await page.getByRole("button", { name: "Delete Post" }).click();

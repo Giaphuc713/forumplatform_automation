@@ -7,6 +7,6 @@ test("Đăng nhập", async ({ page }) => {
     .fill("Phucha2639@gmail.com");
   await page.getByRole("textbox", { name: "Mật khẩu" }).fill("Phuc123!");
   await page.getByRole("button", { name: "Đăng nhập" }).click();
-  // Kiểm tra xem có đăng nhập thành công hay không với timeout 10 giây
+  await page.waitForURL("**/forum");
   await expect(page).toHaveURL("/forum", { timeout: 10000 });
 });
